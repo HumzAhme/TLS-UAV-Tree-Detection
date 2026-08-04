@@ -1,0 +1,10 @@
+laspy>=2.5
+numpy
+scipy
+rasterio
+matplotlib
+pyproj
+cloth-simulation-filter
+scikit-image
+pandas
+reportlab

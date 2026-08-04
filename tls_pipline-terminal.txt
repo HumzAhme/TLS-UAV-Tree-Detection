@@ -1,0 +1,40 @@
+python tls_pipeline.py
+[1/6] Loading point cloud: MyDiv_43_L1.las
+      -> 2,237,095 points loaded
+      -> local bounding box: X[700754.66, 700770.43]  Y[5697323.85, 5697340.39]  Z[158.10, 171.13]
+[2/6] SOR filtering (k=8, std_ratio=1.0) ...
+      -> removed 241,340 outlier points (10.79%)
+      -> saved outputs/01_sor_filtered.las (1,995,755 points)
+[3/6] CSF ground classification ...
+[0] Configuring terrain...
+[0]  - bbMin: 700755 -171.081 5.69732e+06
+[0]  - bbMax: 700770 -158.138 5.69734e+06
+[0] Configuring cloth...
+[0]  - width: 19 height: 20
+[0] Rasterizing...
+[0] Simulating...
+[0]  - post handle...
+      -> scene='relief' (rigidness=2), cloth_res=1.0, iterations=600, threshold=0.5
+      -> 82,437 ground points, 1,913,318 non-ground (vegetation/other) points
+[4/6] Saving classified point clouds ...
+      -> saved outputs/02_ground_points.las (82,437 points)
+      -> saved outputs/03_nonground_vegetation_points.las (1,913,318 points)
+[5/6] Rasterizing DTM / DSM / CHM (resolution=0.05 m) ...
+      -> saved outputs/DTM.tif
+      -> saved outputs/DSM.tif
+      -> saved outputs/CHM.tif
+      -> saved outputs/DTM_preview.png
+      -> saved outputs/DSM_preview.png
+      -> saved outputs/CHM_preview.png
+[6/6] Building ground mesh preview ...
+      -> triangulating ground mesh (Delaunay in XY) ...
+      -> saved outputs/ground_mesh.obj
+      -> saved outputs/ground_mesh_preview.png
+
+Done! All outputs saved to: outputs
+ - 01_sor_filtered.las               (cleaned point cloud)
+ - 02_ground_points.las              (classification = 2)
+ - 03_nonground_vegetation_points.las(classification = 1)
+ - DTM.tif / DSM.tif / CHM.tif        (GeoTIFF rasters)
+ - *_preview.png                      (quick-look images)
+ - ground_mesh.obj + preview           (triangulated ground mesh)

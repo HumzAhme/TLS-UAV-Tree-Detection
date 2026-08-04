@@ -1,0 +1,631 @@
+(esc) [go77nawo@clara09 TLS_UAV-data]$ python 03_individual_tree_detection.py 
+==================================================================================
+  INDIVIDUAL TREE DETECTION -- INTERACTIVE PARAMETER SETUP
+==================================================================================
+  For each parameter: press Enter to keep the default shown in [brackets],
+  or type a new value. Choices can be entered as their number or exact name.
+
+----------------------------------------------------------------------------------
+  PROCESSING MODE
+----------------------------------------------------------------------------------
+
+  * batch_mode
+      Process MULTIPLE plots' TLS + UAV files in one run (batch mode -- e.g. 6
+      files for 3 plot numbers, each TLS+UAV pair), or just ONE single .las
+      file? Choose 'yes' for batch -- you'll then be asked for the plot numbers
+      and file-naming patterns; the detection settings you set afterward (ground
+      classification, peak detection, crown delineation, etc.) are applied
+      IDENTICALLY to every file in the batch, since there's normally no reason
+      to tune them differently per plot/sensor. Choose 'no' to process just one
+      specific .las file (or one pre-built CHM GeoTIFF) instead.
+      options: yes / no
+      > value [True]: 
+
+----------------------------------------------------------------------------------
+  SECTION: BATCH / MULTI-FILE SETUP (processing multiple plots' TLS + UAV files)
+----------------------------------------------------------------------------------
+
+  * plot_numbers
+      Which plot numbers to process, as a comma-separated list, e.g. '43,58,70'
+      processes exactly those 3 plots (both their TLS and UAV file each) -- 6
+      files total for 3 plot numbers. Every plot number listed here must have
+      BOTH a matching TLS file and a matching UAV file findable via the two
+      filename patterns below, or that file is skipped with a printed warning
+      (not a crash).
+      format: comma-separated numbers, e.g. 43,58,70
+      > value [[43, 58, 70]]: 
+
+  * tls_dir
+      Folder containing your TLS .las files (e.g. Plot43_MyDiv.las). '.' means
+      the same folder this script is run from.
+      > value [.]: 
+
+  * uav_dir
+      Folder containing your UAV-LiDAR .las files (e.g. MyDiv_43_L1.las). Often
+      the same folder as tls_dir -- '.' means the same folder this script is run
+      from.
+      > value [.]: 
+
+  * tls_name_pattern
+      Filename pattern for TLS files, with {n} standing in for the plot number
+      -- e.g. 'Plot{n}_MyDiv.las' matches Plot43_MyDiv.las, Plot58_MyDiv.las,
+      etc. for plot_numbers 43, 58. Must contain the literal text '{n}'
+      somewhere.
+      > value [Plot{n}_MyDiv.las]: 
+
+  * uav_name_pattern
+      Same idea as tls_name_pattern but for the UAV files -- e.g.
+      'MyDiv_{n}_L1.las' matches MyDiv_43_L1.las, MyDiv_58_L1.las, etc.
+      > value [MyDiv_{n}_L1.las]: 
+
+  * batch_output_dir
+      Folder where ALL batch results go. A subfolder is created per plot+sensor
+      combination, e.g. batch_output_dir/Plot43_TLS/, Plot43_UAV/, Plot58_TLS/,
+      ... each containing that file's full normal output set
+      (detected_trees.csv, trees_bboxes.png, etc.), plus a combined summary CSV
+      and PDF report directly inside batch_output_dir itself.
+      > value [outputs/tree_detection_batch]: 
+
+  * generate_pdf_report
+      Build a combined PDF report at the end, comparing tree
+      counts/heights/crown sizes across all processed plots and sensors, with a
+      summary table, TLS-vs-UAV comparison charts, all detection images, and a
+      written discussion of expected differences. If False, you still get the
+      per-file outputs and the summary CSV, just no PDF.
+      options: yes / no
+      > value [True]: 
+
+  * report_filename
+      Filename (not full path) for the PDF report, saved inside
+      batch_output_dir.
+      > value [Tree_Detection_Report.pdf]: 
+
+  * report_data_is_placeholder
+      Show a disclosure banner at the top of the PDF stating the input data may
+      be synthetic/placeholder rather than real scans. Set to No once you've
+      confirmed you're running on your actual real .las files, to remove the
+      banner.
+      options: yes / no
+      > value [True]: 
+
+----------------------------------------------------------------------------------
+  SECTION: GROUND CLASSIFICATION (CSF)
+----------------------------------------------------------------------------------
+
+  * csf_scene
+      Terrain roughness preset for the Cloth Simulation Filter
+      [1] steep_slope
+      [2] relief  <- default
+      [3] flat
+      > value [relief]: 
+
+  * csf_cloth_resolution
+      Cloth grid spacing -- smaller follows finer terrain detail but is slower /
+      more easily caught by low vegetation
+      typical range: 0.1 m to 5.0 m
+      > value [1.0]: 
+
+  * csf_max_iterations
+      Max cloth simulation steps -- more lets the cloth fully settle onto the
+      terrain
+      typical range: 50 to 1000
+      > value [600]: 
+
+  * csf_class_threshold
+      Distance below the settled cloth within which a point counts as ground
+      typical range: 0.05 m to 2.0 m
+      > value [0.5]: 
+
+----------------------------------------------------------------------------------
+  SECTION: RASTERIZATION
+----------------------------------------------------------------------------------
+
+  * chm_res
+      CHM grid resolution used for tree DETECTION (not the true-color image --
+      see topview2_res below for that)
+      typical range: 0.01 m/px to 1.0 m/px
+      > value [0.05]: 
+
+----------------------------------------------------------------------------------
+  SECTION: CHM SMOOTHING
+----------------------------------------------------------------------------------
+
+  * smoothing_sigma_m
+      Gaussian blur applied before treetop search -- lower risks
+      over-segmentation (noise treated as trees), higher risks merging close
+      real trees together
+      typical range: 0.0 m to 1.5 m
+      > value [0.15]: 
+
+----------------------------------------------------------------------------------
+  SECTION: MINIMUM TREE HEIGHT
+----------------------------------------------------------------------------------
+
+  * min_height_m
+      Pixels below this height are never treated as a treetop (excludes
+      grass/shrubs/noise)
+      typical range: 0.0 m to 10.0 m
+      > value [0.5]: 
+
+----------------------------------------------------------------------------------
+  SECTION: PEAK DETECTION METHOD
+----------------------------------------------------------------------------------
+
+  * peak_detection_method
+      How treetops are found. h_maxima recommended for tightly-packed trees with
+      only a shallow dip between crowns
+      [1] fixed
+      [2] variable
+      [3] h_maxima  <- default
+      > value [h_maxima]: 
+
+  * h_maxima_prominence_m
+      (h_maxima only) Minimum bump height above its connecting saddle to count
+      as its own tree -- THE key knob for splitting merged close-together trees
+      typical range: 0.02 m to 2.0 m
+      > value [0.1]: 
+
+----------------------------------------------------------------------------------
+  SECTION: TREETOP SEARCH WINDOW (only used if peak_detection_method is fixed/variable)
+----------------------------------------------------------------------------------
+
+  * window_mode
+      Constant search radius (fixed) or height-scaled radius (variable)
+      [1] fixed
+      [2] variable  <- default
+      > value [variable]: 
+
+  * fixed_window_radius_m
+      (fixed mode) constant minimum spacing enforced between treetops
+      typical range: 0.1 m to 5.0 m
+      > value [1.0]: 
+
+  * vwf_a
+      (variable mode) radius intercept: radius = a + b*height
+      typical range: 0.0 m to 3.0 m
+      > value [0.5]: 
+
+  * vwf_b
+      (variable mode) radius slope per meter of height
+      typical range: 0.0 to 1.0
+      > value [0.15]: 
+
+  * vwf_min_radius_m
+      (variable mode) minimum clamp on the computed radius
+      typical range: 0.05 m to 3.0 m
+      > value [0.3]: 
+
+  * vwf_max_radius_m
+      (variable mode) maximum clamp on the computed radius
+      typical range: 0.5 m to 10.0 m
+      > value [3.0]: 
+
+----------------------------------------------------------------------------------
+  SECTION: CROWN DELINEATION (WATERSHED)
+----------------------------------------------------------------------------------
+
+  * th_seed
+      Minimum height fraction of a tree's own seed height a pixel must have to
+      join that crown -- higher = smaller, tighter crowns
+      typical range: 0.05 fraction to 0.95 fraction
+      > value [0.4]: 
+
+  * max_crown_radius_m
+      Hard cap on how far any single tree's crown can extend outward from its
+      treetop -- prevents one tree 'eating' its neighbors
+      typical range: 0.1 m to 15.0 m
+      > value [0.5]: 
+
+----------------------------------------------------------------------------------
+  SECTION: 3D POINT-TO-TREE ASSIGNMENT
+----------------------------------------------------------------------------------
+
+  * point_assignment_mode
+      How individual 3D points get assigned to a tree ID
+      [1] columnar  <- default
+      [2] conical
+      > value [columnar]: 
+
+  * conical_top_radius_factor
+      (conical only) crown-radius multiplier applied at treetop height
+      typical range: 0.1 to 3.0
+      > value [1.0]: 
+
+  * conical_bottom_radius_factor
+      (conical only) crown-radius multiplier applied near the ground
+      typical range: 0.0 to 2.0
+      > value [0.3]: 
+
+----------------------------------------------------------------------------------
+  SECTION: VISUALIZATION -- CHM/hillshade background (trees_bboxes.png / trees_crown_outlines.png)
+----------------------------------------------------------------------------------
+
+  * display_style
+      Background rendering style for these two files
+      [1] hillshade  <- default
+      [2] flat
+      > value [hillshade]: 
+
+  * display_use_smoothed
+      Use the smoothed CHM (blurrier) instead of the raw CHM for the background
+      image (does not affect detection either way)
+      options: yes / no
+      > value [False]: 
+
+  * hillshade_azimuth_deg
+      Simulated sun compass direction for the hillshade effect
+      typical range: 0 deg to 360 deg
+      > value [315]: 
+
+  * hillshade_altitude_deg
+      Simulated sun height above the horizon
+      typical range: 0 deg to 90 deg
+      > value [45]: 
+
+  * chm_background_cmap
+      Matplotlib colormap name for the height tint, e.g. Greens_r, Greys_r,
+      viridis
+      > value [Greens_r]: 
+
+----------------------------------------------------------------------------------
+  SECTION: VISUALIZATION -- box coloring
+----------------------------------------------------------------------------------
+
+  * bbox_color_by
+      How each detected tree's bounding box is colored
+      [1] height  <- default
+      [2] tree_id
+      [3] confidence
+      > value [height]: 
+
+  * low_confidence_crown_area_m2
+      Crown area below this is flagged as low-confidence (dashed box outline)
+      typical range: 0.01 m^2 to 5.0 m^2
+      > value [0.3]: 
+
+----------------------------------------------------------------------------------
+  SECTION: OUTPUT EXTRAS
+----------------------------------------------------------------------------------
+
+  * save_per_tree_las
+      Also save one separate .las file per detected tree (slower/disk-heavy for
+      many trees)
+      options: yes / no
+      > value [False]: 
+
+----------------------------------------------------------------------------------
+  SECTION: TRUE-COLOR TOP VIEW (trees_bboxes2.png etc -- only if your .las has real RGB)
+----------------------------------------------------------------------------------
+
+  * topview2_res
+      Native pixel resolution of the true-color render, INDEPENDENT of chm_res
+      -- smaller = sharper/more real detail, larger file. Type 'none' to just
+      reuse chm_res
+      typical range: 0.002 m/px to 0.2 m/px  (or 'none' to disable)
+      > value [0.02]: 
+
+  * topview2_smooth_px
+      Gaussian blur (in pixels of the topview2_res grid) for a softer, less
+      pixelated look
+      typical range: 0.0 px to 5.0 px
+      > value [1.5]: 
+
+  * topview2_dpi
+      Output PNG resolution -- 300 is print-quality
+      typical range: 72 dpi to 600 dpi
+      > value [300]: 
+
+==================================================================================
+  SUMMARY OF SELECTED PARAMETERS
+==================================================================================
+
+  PROCESSING MODE
+    batch_mode                       = True
+
+  BATCH / MULTI-FILE SETUP (processing multiple plots' TLS + UAV files)
+    plot_numbers                     = [43, 58, 70]
+    tls_dir                          = .
+    uav_dir                          = .
+    tls_name_pattern                 = Plot{n}_MyDiv.las
+    uav_name_pattern                 = MyDiv_{n}_L1.las
+    batch_output_dir                 = outputs/tree_detection_batch
+    generate_pdf_report              = True
+    report_filename                  = Tree_Detection_Report.pdf
+    report_data_is_placeholder       = True
+
+  GROUND CLASSIFICATION (CSF)
+    csf_scene                        = relief
+    csf_cloth_resolution             = 1.0
+    csf_max_iterations               = 600
+    csf_class_threshold              = 0.5
+
+  RASTERIZATION
+    chm_res                          = 0.05
+
+  CHM SMOOTHING
+    smoothing_sigma_m                = 0.15
+
+  MINIMUM TREE HEIGHT
+    min_height_m                     = 0.5
+
+  PEAK DETECTION METHOD
+    peak_detection_method            = h_maxima
+    h_maxima_prominence_m            = 0.1
+
+  TREETOP SEARCH WINDOW (only used if peak_detection_method is fixed/variable)
+    window_mode                      = variable
+    fixed_window_radius_m            = 1.0
+    vwf_a                            = 0.5
+    vwf_b                            = 0.15
+    vwf_min_radius_m                 = 0.3
+    vwf_max_radius_m                 = 3.0
+
+  CROWN DELINEATION (WATERSHED)
+    th_seed                          = 0.4
+    max_crown_radius_m               = 0.5
+
+  3D POINT-TO-TREE ASSIGNMENT
+    point_assignment_mode            = columnar
+    conical_top_radius_factor        = 1.0
+    conical_bottom_radius_factor     = 0.3
+
+  VISUALIZATION -- CHM/hillshade background (trees_bboxes.png / trees_crown_outlines.png)
+    display_style                    = hillshade
+    display_use_smoothed             = False
+    hillshade_azimuth_deg            = 315
+    hillshade_altitude_deg           = 45
+    chm_background_cmap              = Greens_r
+
+  VISUALIZATION -- box coloring
+    bbox_color_by                    = height
+    low_confidence_crown_area_m2     = 0.3
+
+  OUTPUT EXTRAS
+    save_per_tree_las                = False
+
+  TRUE-COLOR TOP VIEW (trees_bboxes2.png etc -- only if your .las has real RGB)
+    topview2_res                     = 0.02
+    topview2_smooth_px               = 1.5
+    topview2_dpi                     = 300
+
+==================================================================================
+
+Proceed with these settings? [Enter/y = run, n = quit, or type a parameter name to edit it]: 
+
+======================================================================
+BATCH: Plot 43 - TLS  (./Plot43_MyDiv.las)
+======================================================================
+[1/6] Building CHM from raw LAS: ./Plot43_MyDiv.las
+      real RGB color data found in this .las -- will additionally render trees_bboxes2.png using the actual point colors (trees_bboxes.png / trees_crown_outlines.png are unaffected -- they always use the CHM/hillshade rendering)
+[0] Configuring terrain...
+[0]  - bbMin: 700752 -132.901 5.69733e+06
+[0]  - bbMax: 700769 -121.077 5.69734e+06
+[0] Configuring cloth...
+[0]  - width: 21 height: 21
+[0] Rasterizing...
+[0] Simulating...
+[0]  - post handle...
+      CHM built: shape=(359, 358), resolution=0.05 m
+[2/6] Smoothed CHM (sigma=0.15 m = 3.00 px)
+[3/6] Detected 178 candidate treetops (mode=h_maxima, prominence=0.1 m, min_height=0.5 m)
+[4/6] Watershed segmentation complete: 178 crowns delineated (th_seed=0.4, max_crown_radius=0.5 m)
+[5/6] Computed metrics for 178 trees
+      saved outputs/tree_detection_batch/Plot43_TLS/Plot43_TLS_detected_trees.csv
+[6/6] saved outputs/tree_detection_batch/Plot43_TLS/Plot43_TLS_trees_bboxes.png
+      saved outputs/tree_detection_batch/Plot43_TLS/Plot43_TLS_trees_crown_outlines.png
+      saved outputs/tree_detection_batch/Plot43_TLS/Plot43_TLS_tree_labels.tif
+      true-color top view rendered at 0.02 m/pixel (896x898 px)
+      saved outputs/tree_detection_batch/Plot43_TLS/Plot43_TLS_trees_bboxes2.png
+      saved outputs/tree_detection_batch/Plot43_TLS/Plot43_TLS_trees_crown_outlines2.png
+      saved outputs/tree_detection_batch/Plot43_TLS/Plot43_TLS_tree_labels2.tif
+[0] Configuring terrain...
+[0]  - bbMin: 700752 -132.901 5.69733e+06
+[0]  - bbMax: 700769 -121.077 5.69734e+06
+[0] Configuring cloth...
+[0]  - width: 21 height: 21
+[0] Rasterizing...
+[0] Simulating...
+[0]  - post handle...
+      saved outputs/tree_detection_batch/Plot43_TLS/Plot43_TLS_points_with_tree_id.las (open in CloudCompare, color by 'tree_id' scalar field)
+
+Done. 178 trees detected. Outputs in: outputs/tree_detection_batch/Plot43_TLS
+  height range: 1.94 - 9.85 m (mean 6.01 m)
+
+======================================================================
+BATCH: Plot 43 - UAV  (./MyDiv_43_L1.las)
+======================================================================
+[1/6] Building CHM from raw LAS: ./MyDiv_43_L1.las
+      real RGB color data found in this .las -- will additionally render trees_bboxes2.png using the actual point colors (trees_bboxes.png / trees_crown_outlines.png are unaffected -- they always use the CHM/hillshade rendering)
+[0] Configuring terrain...
+[0]  - bbMin: 700755 -171.081 5.69732e+06
+[0]  - bbMax: 700770 -158.138 5.69734e+06
+[0] Configuring cloth...
+[0]  - width: 19 height: 20
+[0] Rasterizing...
+[0] Simulating...
+[0]  - post handle...
+      CHM built: shape=(332, 317), resolution=0.05 m
+[2/6] Smoothed CHM (sigma=0.15 m = 3.00 px)
+[3/6] Detected 58 candidate treetops (mode=h_maxima, prominence=0.1 m, min_height=0.5 m)
+[4/6] Watershed segmentation complete: 58 crowns delineated (th_seed=0.4, max_crown_radius=0.5 m)
+[5/6] Computed metrics for 58 trees
+      saved outputs/tree_detection_batch/Plot43_UAV/Plot43_UAV_detected_trees.csv
+[6/6] saved outputs/tree_detection_batch/Plot43_UAV/Plot43_UAV_trees_bboxes.png
+      saved outputs/tree_detection_batch/Plot43_UAV/Plot43_UAV_trees_crown_outlines.png
+      saved outputs/tree_detection_batch/Plot43_UAV/Plot43_UAV_tree_labels.tif
+      true-color top view rendered at 0.02 m/pixel (793x830 px)
+      saved outputs/tree_detection_batch/Plot43_UAV/Plot43_UAV_trees_bboxes2.png
+      saved outputs/tree_detection_batch/Plot43_UAV/Plot43_UAV_trees_crown_outlines2.png
+      saved outputs/tree_detection_batch/Plot43_UAV/Plot43_UAV_tree_labels2.tif
+[0] Configuring terrain...
+[0]  - bbMin: 700755 -171.081 5.69732e+06
+[0]  - bbMax: 700770 -158.138 5.69734e+06
+[0] Configuring cloth...
+[0]  - width: 19 height: 20
+[0] Rasterizing...
+[0] Simulating...
+[0]  - post handle...
+      saved outputs/tree_detection_batch/Plot43_UAV/Plot43_UAV_points_with_tree_id.las (open in CloudCompare, color by 'tree_id' scalar field)
+
+Done. 58 trees detected. Outputs in: outputs/tree_detection_batch/Plot43_UAV
+  height range: 5.85 - 12.32 m (mean 10.00 m)
+
+======================================================================
+BATCH: Plot 58 - TLS  (./Plot58_MyDiv.las)
+======================================================================
+[1/6] Building CHM from raw LAS: ./Plot58_MyDiv.las
+      real RGB color data found in this .las -- will additionally render trees_bboxes2.png using the actual point colors (trees_bboxes.png / trees_crown_outlines.png are unaffected -- they always use the CHM/hillshade rendering)
+[0] Configuring terrain...
+[0]  - bbMin: 700774 -131.289 5.69729e+06
+[0]  - bbMax: 700792 -122.971 5.6973e+06
+[0] Configuring cloth...
+[0]  - width: 21 height: 20
+[0] Rasterizing...
+[0] Simulating...
+[0]  - post handle...
+      CHM built: shape=(328, 345), resolution=0.05 m
+[2/6] Smoothed CHM (sigma=0.15 m = 3.00 px)
+[3/6] Detected 147 candidate treetops (mode=h_maxima, prominence=0.1 m, min_height=0.5 m)
+[4/6] Watershed segmentation complete: 147 crowns delineated (th_seed=0.4, max_crown_radius=0.5 m)
+[5/6] Computed metrics for 147 trees
+      saved outputs/tree_detection_batch/Plot58_TLS/Plot58_TLS_detected_trees.csv
+[6/6] saved outputs/tree_detection_batch/Plot58_TLS/Plot58_TLS_trees_bboxes.png
+      saved outputs/tree_detection_batch/Plot58_TLS/Plot58_TLS_trees_crown_outlines.png
+      saved outputs/tree_detection_batch/Plot58_TLS/Plot58_TLS_tree_labels.tif
+      true-color top view rendered at 0.02 m/pixel (863x821 px)
+      saved outputs/tree_detection_batch/Plot58_TLS/Plot58_TLS_trees_bboxes2.png
+      saved outputs/tree_detection_batch/Plot58_TLS/Plot58_TLS_trees_crown_outlines2.png
+      saved outputs/tree_detection_batch/Plot58_TLS/Plot58_TLS_tree_labels2.tif
+[0] Configuring terrain...
+[0]  - bbMin: 700774 -131.289 5.69729e+06
+[0]  - bbMax: 700792 -122.971 5.6973e+06
+[0] Configuring cloth...
+[0]  - width: 21 height: 20
+[0] Rasterizing...
+[0] Simulating...
+[0]  - post handle...
+      saved outputs/tree_detection_batch/Plot58_TLS/Plot58_TLS_points_with_tree_id.las (open in CloudCompare, color by 'tree_id' scalar field)
+
+Done. 147 trees detected. Outputs in: outputs/tree_detection_batch/Plot58_TLS
+  height range: 1.79 - 6.83 m (mean 4.36 m)
+
+======================================================================
+BATCH: Plot 58 - UAV  (./MyDiv_58_L1.las)
+======================================================================
+[1/6] Building CHM from raw LAS: ./MyDiv_58_L1.las
+      real RGB color data found in this .las -- will additionally render trees_bboxes2.png using the actual point colors (trees_bboxes.png / trees_crown_outlines.png are unaffected -- they always use the CHM/hillshade rendering)
+[0] Configuring terrain...
+[0]  - bbMin: 700773 -167.724 5.69728e+06
+[0]  - bbMax: 700790 -158.391 5.6973e+06
+[0] Configuring cloth...
+[0]  - width: 20 height: 19
+[0] Rasterizing...
+[0] Simulating...
+[0]  - post handle...
+      CHM built: shape=(315, 325), resolution=0.05 m
+[2/6] Smoothed CHM (sigma=0.15 m = 3.00 px)
+[3/6] Detected 63 candidate treetops (mode=h_maxima, prominence=0.1 m, min_height=0.5 m)
+[4/6] Watershed segmentation complete: 63 crowns delineated (th_seed=0.4, max_crown_radius=0.5 m)
+[5/6] Computed metrics for 63 trees
+      saved outputs/tree_detection_batch/Plot58_UAV/Plot58_UAV_detected_trees.csv
+[6/6] saved outputs/tree_detection_batch/Plot58_UAV/Plot58_UAV_trees_bboxes.png
+      saved outputs/tree_detection_batch/Plot58_UAV/Plot58_UAV_trees_crown_outlines.png
+      saved outputs/tree_detection_batch/Plot58_UAV/Plot58_UAV_tree_labels.tif
+      true-color top view rendered at 0.02 m/pixel (813x788 px)
+      saved outputs/tree_detection_batch/Plot58_UAV/Plot58_UAV_trees_bboxes2.png
+      saved outputs/tree_detection_batch/Plot58_UAV/Plot58_UAV_trees_crown_outlines2.png
+      saved outputs/tree_detection_batch/Plot58_UAV/Plot58_UAV_tree_labels2.tif
+[0] Configuring terrain...
+[0]  - bbMin: 700773 -167.724 5.69728e+06
+[0]  - bbMax: 700790 -158.391 5.6973e+06
+[0] Configuring cloth...
+[0]  - width: 20 height: 19
+[0] Rasterizing...
+[0] Simulating...
+[0]  - post handle...
+      saved outputs/tree_detection_batch/Plot58_UAV/Plot58_UAV_points_with_tree_id.las (open in CloudCompare, color by 'tree_id' scalar field)
+
+Done. 63 trees detected. Outputs in: outputs/tree_detection_batch/Plot58_UAV
+  height range: 4.91 - 8.96 m (mean 7.31 m)
+
+======================================================================
+BATCH: Plot 70 - TLS  (./Plot70_MyDiv.las)
+======================================================================
+[1/6] Building CHM from raw LAS: ./Plot70_MyDiv.las
+      real RGB color data found in this .las -- will additionally render trees_bboxes2.png using the actual point colors (trees_bboxes.png / trees_crown_outlines.png are unaffected -- they always use the CHM/hillshade rendering)
+[0] Configuring terrain...
+[0]  - bbMin: 572.675 -6.845 506.843
+[0]  - bbMax: 589.55 1.643 522.825
+[0] Configuring cloth...
+[0]  - width: 20 height: 19
+[0] Rasterizing...
+[0] Simulating...
+[0]  - post handle...
+      CHM built: shape=(321, 339), resolution=0.05 m
+[2/6] Smoothed CHM (sigma=0.15 m = 3.00 px)
+[3/6] Detected 136 candidate treetops (mode=h_maxima, prominence=0.1 m, min_height=0.5 m)
+[4/6] Watershed segmentation complete: 136 crowns delineated (th_seed=0.4, max_crown_radius=0.5 m)
+[5/6] Computed metrics for 136 trees
+      saved outputs/tree_detection_batch/Plot70_TLS/Plot70_TLS_detected_trees.csv
+[6/6] saved outputs/tree_detection_batch/Plot70_TLS/Plot70_TLS_trees_bboxes.png
+      saved outputs/tree_detection_batch/Plot70_TLS/Plot70_TLS_trees_crown_outlines.png
+      saved outputs/tree_detection_batch/Plot70_TLS/Plot70_TLS_tree_labels.tif
+      true-color top view rendered at 0.02 m/pixel (848x803 px)
+      saved outputs/tree_detection_batch/Plot70_TLS/Plot70_TLS_trees_bboxes2.png
+      saved outputs/tree_detection_batch/Plot70_TLS/Plot70_TLS_trees_crown_outlines2.png
+      saved outputs/tree_detection_batch/Plot70_TLS/Plot70_TLS_tree_labels2.tif
+[0] Configuring terrain...
+[0]  - bbMin: 572.675 -6.845 506.843
+[0]  - bbMax: 589.55 1.643 522.825
+[0] Configuring cloth...
+[0]  - width: 20 height: 19
+[0] Rasterizing...
+[0] Simulating...
+[0]  - post handle...
+      saved outputs/tree_detection_batch/Plot70_TLS/Plot70_TLS_points_with_tree_id.las (open in CloudCompare, color by 'tree_id' scalar field)
+
+Done. 136 trees detected. Outputs in: outputs/tree_detection_batch/Plot70_TLS
+  height range: 1.30 - 6.64 m (mean 4.52 m)
+
+======================================================================
+BATCH: Plot 70 - UAV  (./MyDiv_70_L1.las)
+======================================================================
+[1/6] Building CHM from raw LAS: ./MyDiv_70_L1.las
+      real RGB color data found in this .las -- will additionally render trees_bboxes2.png using the actual point colors (trees_bboxes.png / trees_crown_outlines.png are unaffected -- they always use the CHM/hillshade rendering)
+[0] Configuring terrain...
+[0]  - bbMin: 700731 -167.17 5.69722e+06
+[0]  - bbMax: 700747 -158.162 5.69724e+06
+[0] Configuring cloth...
+[0]  - width: 19 height: 20
+[0] Rasterizing...
+[0] Simulating...
+[0]  - post handle...
+      CHM built: shape=(328, 316), resolution=0.05 m
+[2/6] Smoothed CHM (sigma=0.15 m = 3.00 px)
+[3/6] Detected 60 candidate treetops (mode=h_maxima, prominence=0.1 m, min_height=0.5 m)
+[4/6] Watershed segmentation complete: 60 crowns delineated (th_seed=0.4, max_crown_radius=0.5 m)
+[5/6] Computed metrics for 60 trees
+      saved outputs/tree_detection_batch/Plot70_UAV/Plot70_UAV_detected_trees.csv
+[6/6] saved outputs/tree_detection_batch/Plot70_UAV/Plot70_UAV_trees_bboxes.png
+      saved outputs/tree_detection_batch/Plot70_UAV/Plot70_UAV_trees_crown_outlines.png
+      saved outputs/tree_detection_batch/Plot70_UAV/Plot70_UAV_tree_labels.tif
+      true-color top view rendered at 0.02 m/pixel (790x821 px)
+      saved outputs/tree_detection_batch/Plot70_UAV/Plot70_UAV_trees_bboxes2.png
+      saved outputs/tree_detection_batch/Plot70_UAV/Plot70_UAV_trees_crown_outlines2.png
+      saved outputs/tree_detection_batch/Plot70_UAV/Plot70_UAV_tree_labels2.tif
+[0] Configuring terrain...
+[0]  - bbMin: 700731 -167.17 5.69722e+06
+[0]  - bbMax: 700747 -158.162 5.69724e+06
+[0] Configuring cloth...
+[0]  - width: 19 height: 20
+[0] Rasterizing...
+[0] Simulating...
+[0]  - post handle...
+      saved outputs/tree_detection_batch/Plot70_UAV/Plot70_UAV_points_with_tree_id.las (open in CloudCompare, color by 'tree_id' scalar field)
+
+Done. 60 trees detected. Outputs in: outputs/tree_detection_batch/Plot70_UAV
+  height range: 3.85 - 8.44 m (mean 6.83 m)
+      saved outputs/tree_detection_batch/tree_detection_summary.csv
+      saved outputs/tree_detection_batch/Tree_Detection_Report.pdf
+
+Batch done. 6 plot/sensor runs completed. See: outputs/tree_detection_batch
