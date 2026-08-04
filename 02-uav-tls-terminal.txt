@@ -1,0 +1,57 @@
+ python 02_uav_tls_chm_comparison.py 
+
+=== Plot 43 ===
+  SOR filter: kept 26,126,958 / 26,126,961 points
+  downsampled 26,126,958 -> 1,637,895 points for CSF ground classification
+[0] Configuring terrain...
+[0]  - bbMin: 700752 -132.901 5.69733e+06
+[0]  - bbMax: 700769 -121.077 5.69734e+06
+[0] Configuring cloth...
+[0]  - width: 21 height: 21
+[0] Rasterizing...
+[0] Simulating...
+[0]  - post handle...
+  TLS CHM: shape=(359, 358), mean=3.91 m
+  SOR filter (UAV): kept 1,995,755 / 2,237,095 points
+  UAV CHM: shape=(112, 107), mean=8.55 m
+
+=== Plot 58 ===
+  SOR filter: kept 25,114,865 / 26,654,958 points
+  downsampled 25,114,865 -> 1,223,558 points for CSF ground classification
+[0] Configuring terrain...
+[0]  - bbMin: 700774 -131.286 5.69729e+06
+[0]  - bbMax: 700792 -122.972 5.6973e+06
+[0] Configuring cloth...
+[0]  - width: 21 height: 20
+[0] Rasterizing...
+[0] Simulating...
+[0]  - post handle...
+  TLS CHM: shape=(328, 345), mean=3.38 m
+  SOR filter (UAV): kept 1,116,690 / 1,212,375 points
+  UAV CHM: shape=(106, 109), mean=5.96 m
+
+=== Plot 70 ===
+  SOR filter: kept 25,545,888 / 27,374,951 points
+  downsampled 25,545,888 -> 1,310,743 points for CSF ground classification
+[0] Configuring terrain...
+[0]  - bbMin: 572.675 -6.844 506.843
+[0]  - bbMax: 589.55 1.643 522.823
+[0] Configuring cloth...
+[0]  - width: 20 height: 19
+[0] Rasterizing...
+[0] Simulating...
+[0]  - post handle...
+  TLS CHM: shape=(321, 339), mean=3.44 m
+  SOR filter (UAV): kept 787,428 / 843,730 points
+  UAV CHM: shape=(110, 106), mean=5.34 m
+  ! WARNING: TLS and UAV rasters for Plot 70 overlap by only 0.0% of the TLS extent -- they are very likely registered in DIFFERENT coordinate systems for this plot.
+    TLS extent  (x,y): [572.7, 589.6] x [506.8, 522.8]
+    UAV extent  (x,y): [700731.3, 700747.2] x [5697221.0, 5697237.5]
+    -> auto-recentered TLS raster by (dx=700158.1, dy=5696714.4) m to align centroids with the UAV raster (approximate; set 'auto_recenter_on_mismatch': False in CONFIG to disable and keep the NaN result instead)
+saved outputs/uav_tls_comparison/chm_summary.csv
+saved outputs/uav_tls_comparison/CHM_sd_comparison.png
+saved outputs/uav_tls_comparison/foliage_height_boxplot_TLS_vs_UAV.png
+
+Saved detailed assignment answers to: outputs/uav_tls_comparison/UAV_TLS_comparison_answers.md
+
+Done. See: outputs/uav_tls_comparison

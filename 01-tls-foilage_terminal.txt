@@ -1,0 +1,64 @@
+(esc) [go77nawo@clara09 TLS_UAV-data]$ python 01_tls_foliage_density_pipeline.py 
+Filtering to plot_numbers=[43, 58, 70]: 3/3 files matched
+
+=== Processing Plot43_MyDiv.las (Plot43) ===
+  loaded 26,126,961 points
+  SOR filter: kept 26,126,958 / 26,126,961 points
+  downsampled 26,126,958 -> 1,637,895 points for CSF ground classification (voxel=0.02 m)
+[0] Configuring terrain...
+[0]  - bbMin: 700752 -132.901 5.69733e+06
+[0]  - bbMax: 700769 -121.077 5.69734e+06
+[0] Configuring cloth...
+[0]  - width: 21 height: 21
+[0] Rasterizing...
+[0] Simulating...
+[0]  - post handle...
+  ground points: 440,947 / 1,637,895 (from the downsampled classification pass)
+  thinned ground points 440,947 -> 87,887 for faster TIN construction (voxel=0.05 m, matches dtm_res)
+  height-normalized: 20,497,347 points (Z>=0)
+
+=== Processing Plot58_MyDiv.las (Plot58) ===
+  loaded 26,654,958 points
+  SOR filter: kept 25,114,865 / 26,654,958 points
+  downsampled 25,114,865 -> 1,223,558 points for CSF ground classification (voxel=0.02 m)
+[0] Configuring terrain...
+[0]  - bbMin: 700774 -131.286 5.69729e+06
+[0]  - bbMax: 700792 -122.972 5.6973e+06
+[0] Configuring cloth...
+[0]  - width: 21 height: 20
+[0] Rasterizing...
+[0] Simulating...
+[0]  - post handle...
+  ground points: 315,959 / 1,223,558 (from the downsampled classification pass)
+  thinned ground points 315,959 -> 62,867 for faster TIN construction (voxel=0.05 m, matches dtm_res)
+  height-normalized: 19,834,606 points (Z>=0)
+
+=== Processing Plot70_MyDiv.las (Plot70) ===
+  loaded 27,374,951 points
+  SOR filter: kept 25,545,888 / 27,374,951 points
+  downsampled 25,545,888 -> 1,310,743 points for CSF ground classification (voxel=0.02 m)
+[0] Configuring terrain...
+[0]  - bbMin: 572.675 -6.844 506.843
+[0]  - bbMax: 589.55 1.643 522.823
+[0] Configuring cloth...
+[0]  - width: 20 height: 19
+[0] Rasterizing...
+[0] Simulating...
+[0]  - post handle...
+  ground points: 345,585 / 1,310,743 (from the downsampled classification pass)
+  thinned ground points 345,585 -> 64,819 for faster TIN construction (voxel=0.05 m, matches dtm_res)
+  height-normalized: 20,349,510 points (Z>=0)
+saved outputs/tls_results/tls_metrics.csv
+saved outputs/tls_results/LAI_data.csv
+saved outputs/tls_results/TLS_LAI_comparison.csv
+
+--- Correlations with field LAI ---
+  LAI vs FHD: r=-0.193, p=0.8763  (n=3)
+  LAI vs max_height: r=-0.121, p=0.9230  (n=3)
+  LAI vs canopy_volume_per_ground_area: r=0.177, p=0.8867  (n=3)
+  LAI vs chm_mean: r=-0.233, p=0.8502  (n=3)
+  LAI vs RH98: r=-0.157, p=0.8994  (n=3)
+
+Saved detailed assignment answers to: outputs/tls_results/TLS_assignment_answers.md
+
+Done. See: outputs/tls_results
