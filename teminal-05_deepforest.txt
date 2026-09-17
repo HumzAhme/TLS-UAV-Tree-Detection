@@ -1,0 +1,215 @@
+(env_deepforest_test) [go77nawo@clara11 TLS_UAV-data]$ python 05_deepforest_itd.py
+==============================================================================
+  DEEPFOREST AI TREE DETECTION -- CROSS-VALIDATION AGAINST 03
+==============================================================================
+  Plots: [43, 58, 70]   Output: outputs/deepforest_itd
+  See this script's header comment for the honest caveats before
+  trusting these results (domain mismatch, RGB requirement, etc.)
+
+==============================================================================
+DeepForest ITD: Plot 43 - TLS
+==============================================================================
+  [1/4] Reading ./Plot43_MyDiv.las ...
+        26,126,961 points loaded
+        real RGB color data found -- proceeding
+  [2/4] Ground classification + CHM (for height lookup later)...
+        SOR filter: kept 26,126,958 / 26,126,961 points
+        downsampled 26,126,958 -> 1,637,895 points for CSF ground classification
+[0] Configuring terrain...
+[0]  - bbMin: 700752 -132.901 5.69733e+06
+[0]  - bbMax: 700769 -121.077 5.69734e+06
+[0] Configuring cloth...
+[0]  - width: 21 height: 21
+[0] Rasterizing...
+[0] Simulating...
+[0]  - post handle...
+        ground points: 441,140 / 1,637,895
+        thinned ground points to 87,967 for faster TIN
+        height-normalized: 20,585,888 points (Z>=0)
+        CHM built: shape=(359, 358), mean height=3.91 m
+  [3/4] Building true-color raster for DeepForest...
+        true-color raster: 896x898 px at 0.02 m/pixel
+  [4/4] Saving true-color image + GeoTIFF...
+        saved outputs/deepforest_itd/Plot43_TLS/Plot43_TLS_truecolor.png
+        saved outputs/deepforest_itd/Plot43_TLS/Plot43_TLS_truecolor.tif
+[DeepForest] Loading pretrained model (first run may also download weights, ~100-200 MB)...
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+GPU available: True (cuda), used: True
+TPU available: False, using: 0 TPU cores
+💡 Tip: For seamless cloud logging and experiment tracking, try installing [litlogger](https://pypi.org/project/litlogger/) to enable LitLogger, which logs metrics and artifacts automatically to the Lightning Experiments platform.
+[DeepForest] Model loaded.
+  [DeepForest] Running inference on outputs/deepforest_itd/Plot43_TLS/Plot43_TLS_truecolor.png ...
+  [DeepForest] No trees detected in this image.
+  loaded 178 watershed (03) detections for comparison
+  saved outputs/deepforest_itd/Plot43_TLS/Plot43_TLS_comparison.png
+
+  Plot 43 TLS summary: DeepForest=0 trees, watershed=178 trees, matched=0
+
+==============================================================================
+DeepForest ITD: Plot 43 - UAV
+==============================================================================
+  [1/4] Reading ./MyDiv_43_L1.las ...
+        2,237,095 points loaded
+        real RGB color data found -- proceeding
+  [2/4] Ground classification + CHM (for height lookup later)...
+        SOR filter: kept 1,995,755 / 2,237,095 points
+        downsampled 1,995,755 -> 1,973,839 points for CSF ground classification
+[0] Configuring terrain...
+[0]  - bbMin: 700755 -171.081 5.69732e+06
+[0]  - bbMax: 700770 -158.138 5.69734e+06
+[0] Configuring cloth...
+[0]  - width: 19 height: 20
+[0] Rasterizing...
+[0] Simulating...
+[0]  - post handle...
+        ground points: 81,166 / 1,973,839
+        height-normalized: 1,950,577 points (Z>=0)
+        CHM built: shape=(332, 317), mean height=8.22 m
+  [3/4] Building true-color raster for DeepForest...
+        true-color raster: 793x830 px at 0.02 m/pixel
+  [4/4] Saving true-color image + GeoTIFF...
+        saved outputs/deepforest_itd/Plot43_UAV/Plot43_UAV_truecolor.png
+        saved outputs/deepforest_itd/Plot43_UAV/Plot43_UAV_truecolor.tif
+  [DeepForest] Running inference on outputs/deepforest_itd/Plot43_UAV/Plot43_UAV_truecolor.png ...
+  [DeepForest] 42 / 54 detections kept (confidence >= 0.3)
+  saved outputs/deepforest_itd/Plot43_UAV/Plot43_UAV_deepforest_trees.csv
+  loaded 58 watershed (03) detections for comparison
+  saved outputs/deepforest_itd/Plot43_UAV/Plot43_UAV_comparison.png
+
+  Plot 43 UAV summary: DeepForest=42 trees, watershed=58 trees, matched=28
+
+==============================================================================
+DeepForest ITD: Plot 58 - TLS
+==============================================================================
+  [1/4] Reading ./Plot58_MyDiv.las ...
+        26,654,958 points loaded
+        real RGB color data found -- proceeding
+  [2/4] Ground classification + CHM (for height lookup later)...
+        SOR filter: kept 25,114,865 / 26,654,958 points
+        downsampled 25,114,865 -> 1,223,558 points for CSF ground classification
+[0] Configuring terrain...
+[0]  - bbMin: 700774 -131.286 5.69729e+06
+[0]  - bbMax: 700792 -122.972 5.6973e+06
+[0] Configuring cloth...
+[0]  - width: 21 height: 20
+[0] Rasterizing...
+[0] Simulating...
+[0]  - post handle...
+        ground points: 315,899 / 1,223,558
+        thinned ground points to 62,865 for faster TIN
+        height-normalized: 19,825,487 points (Z>=0)
+        CHM built: shape=(328, 345), mean height=3.38 m
+  [3/4] Building true-color raster for DeepForest...
+        true-color raster: 863x821 px at 0.02 m/pixel
+  [4/4] Saving true-color image + GeoTIFF...
+        saved outputs/deepforest_itd/Plot58_TLS/Plot58_TLS_truecolor.png
+        saved outputs/deepforest_itd/Plot58_TLS/Plot58_TLS_truecolor.tif
+  [DeepForest] Running inference on outputs/deepforest_itd/Plot58_TLS/Plot58_TLS_truecolor.png ...
+  [DeepForest] 0 / 1 detections kept (confidence >= 0.3)
+  loaded 147 watershed (03) detections for comparison
+  saved outputs/deepforest_itd/Plot58_TLS/Plot58_TLS_comparison.png
+
+  Plot 58 TLS summary: DeepForest=0 trees, watershed=147 trees, matched=0
+
+==============================================================================
+DeepForest ITD: Plot 58 - UAV
+==============================================================================
+  [1/4] Reading ./MyDiv_58_L1.las ...
+        1,212,375 points loaded
+        real RGB color data found -- proceeding
+  [2/4] Ground classification + CHM (for height lookup later)...
+        SOR filter: kept 1,116,690 / 1,212,375 points
+        downsampled 1,116,690 -> 1,101,966 points for CSF ground classification
+[0] Configuring terrain...
+[0]  - bbMin: 700773 -167.724 5.69728e+06
+[0]  - bbMax: 700790 -158.391 5.6973e+06
+[0] Configuring cloth...
+[0]  - width: 20 height: 19
+[0] Rasterizing...
+[0] Simulating...
+[0]  - post handle...
+        ground points: 42,209 / 1,101,966
+        height-normalized: 1,092,875 points (Z>=0)
+        CHM built: shape=(315, 325), mean height=5.74 m
+  [3/4] Building true-color raster for DeepForest...
+        true-color raster: 813x788 px at 0.02 m/pixel
+  [4/4] Saving true-color image + GeoTIFF...
+        saved outputs/deepforest_itd/Plot58_UAV/Plot58_UAV_truecolor.png
+        saved outputs/deepforest_itd/Plot58_UAV/Plot58_UAV_truecolor.tif
+  [DeepForest] Running inference on outputs/deepforest_itd/Plot58_UAV/Plot58_UAV_truecolor.png ...
+  [DeepForest] 58 / 72 detections kept (confidence >= 0.3)
+  saved outputs/deepforest_itd/Plot58_UAV/Plot58_UAV_deepforest_trees.csv
+  loaded 63 watershed (03) detections for comparison
+  saved outputs/deepforest_itd/Plot58_UAV/Plot58_UAV_comparison.png
+
+  Plot 58 UAV summary: DeepForest=58 trees, watershed=63 trees, matched=31
+
+==============================================================================
+DeepForest ITD: Plot 70 - TLS
+==============================================================================
+  [1/4] Reading ./Plot70_MyDiv.las ...
+        27,374,951 points loaded
+        real RGB color data found -- proceeding
+  [2/4] Ground classification + CHM (for height lookup later)...
+        SOR filter: kept 25,545,888 / 27,374,951 points
+        downsampled 25,545,888 -> 1,310,743 points for CSF ground classification
+[0] Configuring terrain...
+[0]  - bbMin: 572.675 -6.844 506.843
+[0]  - bbMax: 589.55 1.643 522.823
+[0] Configuring cloth...
+[0]  - width: 20 height: 19
+[0] Rasterizing...
+[0] Simulating...
+[0]  - post handle...
+        ground points: 345,462 / 1,310,743
+        thinned ground points to 64,798 for faster TIN
+        height-normalized: 20,349,140 points (Z>=0)
+        CHM built: shape=(321, 339), mean height=3.44 m
+  [3/4] Building true-color raster for DeepForest...
+        true-color raster: 848x803 px at 0.02 m/pixel
+  [4/4] Saving true-color image + GeoTIFF...
+        saved outputs/deepforest_itd/Plot70_TLS/Plot70_TLS_truecolor.png
+        saved outputs/deepforest_itd/Plot70_TLS/Plot70_TLS_truecolor.tif
+  [DeepForest] Running inference on outputs/deepforest_itd/Plot70_TLS/Plot70_TLS_truecolor.png ...
+  [DeepForest] 0 / 2 detections kept (confidence >= 0.3)
+  loaded 136 watershed (03) detections for comparison
+  saved outputs/deepforest_itd/Plot70_TLS/Plot70_TLS_comparison.png
+
+  Plot 70 TLS summary: DeepForest=0 trees, watershed=136 trees, matched=0
+
+==============================================================================
+DeepForest ITD: Plot 70 - UAV
+==============================================================================
+  [1/4] Reading ./MyDiv_70_L1.las ...
+        843,730 points loaded
+        real RGB color data found -- proceeding
+  [2/4] Ground classification + CHM (for height lookup later)...
+        SOR filter: kept 787,428 / 843,730 points
+        downsampled 787,428 -> 776,170 points for CSF ground classification
+[0] Configuring terrain...
+[0]  - bbMin: 700731 -167.17 5.69722e+06
+[0]  - bbMax: 700747 -158.162 5.69724e+06
+[0] Configuring cloth...
+[0]  - width: 19 height: 20
+[0] Rasterizing...
+[0] Simulating...
+[0]  - post handle...
+        ground points: 41,179 / 776,170
+        height-normalized: 765,597 points (Z>=0)
+        CHM built: shape=(328, 316), mean height=5.12 m
+  [3/4] Building true-color raster for DeepForest...
+        true-color raster: 790x821 px at 0.02 m/pixel
+  [4/4] Saving true-color image + GeoTIFF...
+        saved outputs/deepforest_itd/Plot70_UAV/Plot70_UAV_truecolor.png
+        saved outputs/deepforest_itd/Plot70_UAV/Plot70_UAV_truecolor.tif
+  [DeepForest] Running inference on outputs/deepforest_itd/Plot70_UAV/Plot70_UAV_truecolor.png ...
+  [DeepForest] 24 / 69 detections kept (confidence >= 0.3)
+  saved outputs/deepforest_itd/Plot70_UAV/Plot70_UAV_deepforest_trees.csv
+  loaded 60 watershed (03) detections for comparison
+  saved outputs/deepforest_itd/Plot70_UAV/Plot70_UAV_comparison.png
+
+  Plot 70 UAV summary: DeepForest=24 trees, watershed=60 trees, matched=14
+saved outputs/deepforest_itd/deepforest_comparison_summary.csv
+saved outputs/deepforest_itd/DeepForest_Comparison_Report.pdf
+
+Done. 6 plot/sensor combinations processed. See: outputs/deepforest_itd
