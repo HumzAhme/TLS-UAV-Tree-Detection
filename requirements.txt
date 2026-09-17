@@ -8,3 +8,10 @@ cloth-simulation-filter
 scikit-image
 pandas
 reportlab
+
+
+
+# Optional, only needed for 05_deepforest_itd.py -- NOT installed by
+# default here because it pulls in PyTorch + torchvision (1-5 GB).
+# Install separately only if you want to try the AI-based detection script:
+#   pip install deepforest
