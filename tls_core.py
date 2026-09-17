@@ -23,6 +23,7 @@ import numpy as np
 import laspy
 from scipy.spatial import cKDTree
 from scipy.interpolate import LinearNDInterpolator, NearestNDInterpolator
+from scipy import ndimage as ndi
 import rasterio
 from rasterio.transform import from_origin
 
@@ -569,3 +570,137 @@ def resample_grid_bilinear(src_grid, src_transform, dst_shape, dst_transform):
     )
     dst_grid[dst_grid == -9999] = np.nan
     return dst_grid
+
+
+# ------------------------------------------------------------------
+# 9. True-color (real RGB) rendering
+#    ADDED for 05_deepforest_itd.py, copied here (not moved) from
+#    03_individual_tree_detection.py so that BOTH scripts can share one
+#    implementation without needing to import from each other (Python
+#    doesn't like importing a module whose filename starts with a digit).
+#    03_individual_tree_detection.py keeps its own local copies of these
+#    functions unchanged -- this is a pure ADDITION to tls_core.py, so
+#    01/02/03 are completely unaffected and do NOT need to be re-run.
+# ------------------------------------------------------------------
+
+def has_real_rgb(las):
+    """
+    Checks whether a LAS file has MEANINGFUL color data, not just the
+    red/green/blue FIELDS existing. Several LAS point formats always
+    include red/green/blue dimensions in their file structure even when
+    no one ever populated them -- e.g. an uncolorized TLS scan saved in
+    point format 3 will still technically "have" red/green/blue fields,
+    just all set to 0. Checking only `dimension_names` would wrongly
+    report "yes, this has color" for such a file. This function also
+    checks that the values aren't degenerately all-zero before trusting
+    them.
+    """
+    dims = las.point_format.dimension_names
+    if not all(d in dims for d in ("red", "green", "blue")):
+        return False
+    r, g, b = np.asarray(las.red), np.asarray(las.green), np.asarray(las.blue)
+    return not (r.max() == 0 and g.max() == 0 and b.max() == 0)
+
+
+def extract_rgb01(las):
+    """Returns Nx3 RGB in [0, 1], auto-detecting 8-bit vs. 16-bit LAS color storage."""
+    r = np.asarray(las.red, dtype=float)
+    g = np.asarray(las.green, dtype=float)
+    b = np.asarray(las.blue, dtype=float)
+    scale = 65535.0 if max(r.max(), g.max(), b.max()) > 255 else 255.0
+    return np.stack([r, g, b], axis=1) / scale
+
+
+def rasterize_true_color(xyz_norm, rgb01, transform, shape):
+    """
+    Builds a top-down TRUE-COLOR image from the point cloud's own RGB
+    values, on the exact same grid as the CHM (so boxes drawn later line
+    up correctly). For each output cell, uses the color of whichever
+    point is HIGHEST in that cell -- i.e. the color of the visible
+    "top of canopy" surface, matching what the CHM itself measures.
+    Returns (rgb_image [rows, cols, 3] in [0,1], has_data_mask [rows,cols]).
+    """
+    res = transform.a
+    xmin_world, ymax_world = transform.c, transform.f
+    nrows, ncols = shape
+
+    x, y, z = xyz_norm[:, 0], xyz_norm[:, 1], xyz_norm[:, 2]
+    col = np.clip(((x - xmin_world) / res).astype(int), 0, ncols - 1)
+    row = np.clip(((ymax_world - y) / res).astype(int), 0, nrows - 1)
+    flat_idx = row * ncols + col
+
+    order = np.argsort(z)
+    flat_idx_sorted = flat_idx[order]
+    rgb_sorted = rgb01[order]
+
+    flat_rgb = np.zeros((nrows * ncols, 3))
+    has_data = np.zeros(nrows * ncols, dtype=bool)
+    flat_rgb[flat_idx_sorted] = rgb_sorted
+    has_data[flat_idx_sorted] = True
+
+    return flat_rgb.reshape(nrows, ncols, 3), has_data.reshape(nrows, ncols)
+
+
+def build_finer_transform(transform, shape, target_res):
+    """
+    Given an existing transform+shape describing a real-world extent,
+    builds a NEW, finer transform+shape covering the exact SAME extent at
+    `target_res` meters/pixel.
+    """
+    res = transform.a
+    xmin, ymax = transform.c, transform.f
+    height_m = shape[0] * res
+    width_m = shape[1] * res
+    new_shape = (max(1, int(np.ceil(height_m / target_res))),
+                 max(1, int(np.ceil(width_m / target_res))))
+    new_transform = from_origin(xmin, ymax, target_res, target_res)
+    return new_transform, new_shape
+
+
+def render_photorealistic_topview(xyz_norm, rgb01, transform, shape, cfg):
+    """
+    Builds a high-quality top-down true-color render from the point
+    cloud's own RGB values, at `cfg["topview2_res"]` resolution
+    (independent of the CHM's own resolution), with nearest-neighbor gap
+    filling and light Gaussian smoothing for a continuous, less speckled
+    look. See 03_individual_tree_detection.py's copy of this function for
+    the full explanation of each step.
+
+    NOTE: this copy's return signature is (image, transform, shape) --
+    THREE values, not just the image like 03's local copy -- because
+    05_deepforest_itd.py needs the fine-resolution transform/shape this
+    image was actually rendered at, to correctly convert DeepForest's
+    pixel-coordinate detections back into real-world coordinates. This is
+    a deliberate difference specific to this shared copy; 03's own local
+    copy is untouched and still returns just the image.
+    """
+    target_res = cfg.get("topview2_res") or transform.a
+    if target_res < transform.a:
+        fine_transform, fine_shape = build_finer_transform(transform, shape, target_res)
+    else:
+        fine_transform, fine_shape = transform, shape
+
+    rgb_image, has_data = rasterize_true_color(xyz_norm, rgb01, fine_transform, fine_shape)
+
+    if (~has_data).any() and has_data.any():
+        from scipy.ndimage import distance_transform_edt
+        _, indices = distance_transform_edt(~has_data, return_distances=True, return_indices=True)
+        rgb_image = rgb_image[indices[0], indices[1]]
+
+    sigma_px = cfg.get("topview2_smooth_px", 1.5)
+    if sigma_px > 0:
+        rgb_image = ndi.gaussian_filter(rgb_image, sigma=(sigma_px, sigma_px, 0))
+
+    return np.clip(rgb_image, 0, 1), fine_transform, fine_shape
+
+
+def save_true_color_geotiff(background_rgb, transform, path):
+    """Saves a true-color top view as a 3-band GeoTIFF (uint8, 0-255 per channel)."""
+    rgb255 = (np.clip(background_rgb, 0, 1) * 255).astype(np.uint8)
+    with rasterio.open(
+        path, "w", driver="GTiff",
+        height=rgb255.shape[0], width=rgb255.shape[1],
+        count=3, dtype=np.uint8, crs=None, transform=transform,
+    ) as dst:
+        for i in range(3):
+            dst.write(rgb255[:, :, i], i + 1)
